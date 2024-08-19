@@ -3,14 +3,13 @@
 This module contains an asynchronous function that
 spawn wait_random n times with the specified max_delay.
 """
-
+from typing import List
 import asyncio
 wait_random = __import__('0-basic_async_syntax').wait_random
-from typing import List
 
-async def wait_n(n: int, max_delay: int = 10) -> List[float]:
+
+async def wait_n(n: int, max_delay: int) -> List[float]:
     """"""
-    delays: list[float] = []
-    for _ in range(n):
-        delays.append(await wait_random(max_delay))
-    return delays
+    delays = await asyncio.gather(
+            *list(map(lambda _: wait_random(max_delay), range(n))))
+    return sorted(delays)
