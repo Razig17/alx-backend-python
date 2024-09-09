@@ -8,6 +8,7 @@ from client import GithubOrgClient
 from parameterized import parameterized, parameterized_class
 from fixtures import TEST_PAYLOAD
 from requests import HTTPError
+from typing import Union
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -20,7 +21,7 @@ class TestGithubOrgClient(unittest.TestCase):
         ("abc",),
     ])
     @patch('client.get_json', return_value={"payload": True})
-    def test_org(self, org_name: str, mock_method: Mock):
+    def test_org(self, org_name: str, mock_method: Mock) -> None:
         """test that org method returns the expected result"""
         expected = {"payload": True}
         url = f"https://api.github.com/orgs/{org_name}"
@@ -30,7 +31,7 @@ class TestGithubOrgClient(unittest.TestCase):
         mock_method.assert_called_once_with(url)
         self.assertEqual(result, expected)
 
-    def test_public_repos_url(self):
+    def test_public_repos_url(self) -> None:
         """test that public_repos_url treats org method as a property"""
         expected = {"repos_url": "https://github.com/Mohamed/alx-backend"}
         with patch.object(GithubOrgClient, 'org',
@@ -43,7 +44,7 @@ class TestGithubOrgClient(unittest.TestCase):
             'client.get_json',
             return_value=[{"name": 'simple_shell'}, {"name": 'sorting'}]
     )
-    def test_public_repos(self, get_json_mock: Mock):
+    def test_public_repos(self, get_json_mock: Mock) -> None:
         """test that public_repos_url treats org method as a property"""
         repos_url = {"repos_url": "https://github.com/Mohamed/repos"}
         with patch.object(GithubOrgClient, '_public_repos_url',
@@ -60,7 +61,7 @@ class TestGithubOrgClient(unittest.TestCase):
         ({"license": {"key": "other_license"}}, "my_license", False),
     ])
     def test_has_license(self, repo: dict, license_key: str,
-                         expected: bool):
+                         expected: bool) -> None:
         """
         Test that GithubOrgClient.has_license returns the expected result
         """
@@ -79,14 +80,14 @@ class TestGithubOrgClient(unittest.TestCase):
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Perform an integration test"""
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Set up the class fixure before running the tests"""
         route_payload = {
                 "https://api.github.com/orgs/google": cls.org_payload,
                 "https://api.github.com/orgs/google/repos": cls.repos_payload,
                 }
 
-        def get_paylod(url: str):
+        def get_paylod(url: str) -> Union[HTTPError, Mock]:
             if url in route_payload:
                 return Mock(**{'json.return_value': route_payload[url]})
             return HTTPError
@@ -95,16 +96,16 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher.start()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Tear down the class fixure after running the tests"""
         cls.get_patcher.stop()
 
-    def test_public_repos(self):
+    def test_public_repos(self) -> None:
         """test that public_repos_url treats org method as a property"""
         self.assertEqual(GithubOrgClient("google").public_repos(),
                          self.expected_repos)
 
-    def test_public_repos_with_license(self):
+    def test_public_repos_with_license(self) -> None:
         """
         Test that GithubOrgClient.has_license returns the expected result
         """
